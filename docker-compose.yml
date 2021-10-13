@@ -4,4 +4,4 @@ services:
   itea5:
     image: "docker2706/itea5doc:latest"
     ports:
-      - "8080:80" 
+      - "8081:80" 

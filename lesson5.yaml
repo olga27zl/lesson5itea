@@ -1,0 +1,61 @@
+- name: lesson5
+  hosts: [itea]
+  become: true
+
+  tasks:
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+    
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+
+    - name: Install docker-ce
+      apt: name=docker-ce state=latest
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+
+    - name: Install docker compose    
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.27.3/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+    
+    - name: Install Docker Compose Module for Python
+      pip:
+        name: docker-compose
+
+    - name: Copy Docker Compose files
+      copy:
+        src: /home/olgazl/lesson5/{{ item }}
+        dest: /home/olga2/lesson5/{{ item }}
+      loop:
+      - docker-compose.yml
+
+    - name: Create and start docker compose
+      docker_compose:
+        project_src: /home/olga2/lesson5/
+
+    - name: Create and start container
+      docker_container:
+        name: lesson5container
+        state: started
+        image: docker2706/itea5doc:latest
+        ports:
+           - "8080:80"     
